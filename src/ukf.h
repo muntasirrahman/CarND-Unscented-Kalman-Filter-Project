@@ -53,7 +53,7 @@ public:
   double std_radphi_;
 
   ///* Radar measurement noise standard deviation radius change in m/s
-  double std_radrd_ ;
+  double std_radrd_;
 
   ///* Weights of sigma points
   VectorXd weights_;
@@ -67,6 +67,20 @@ public:
   ///* Sigma point spreading parameter
   double lambda_;
 
+  ///* Sigma points dimension
+  int n_sig_;
+
+  ///* Radar noise covariance matrix
+  MatrixXd R_radar_;
+
+  ///* Lidar noise covariance matrix
+  MatrixXd R_lidar_;
+
+  ///* Latest NIS value for radar
+  double NIS_radar_;
+
+  ///* Latest NIS value for laser
+  double NIS_laser_;
 
   /**
    * Constructor
@@ -99,9 +113,35 @@ public:
 
   /**
    * Updates the state and the state covariance matrix using a radar measurement
-   * @param meas_package The measurement at k+1
+   * @param {MeasurementPackage} meas_package The measurement at k+1
    */
   void UpdateRadar(MeasurementPackage meas_package);
+
+  /**
+   * Generate sigma points
+   * @param x State vector
+   * @param P Covariance matrix
+   * @param lambda Sigma points spreading parameter
+   */
+  MatrixXd GenerateSigmaPoints(VectorXd x, MatrixXd P, double lambda);
+
+  /**
+   * Predict sigma points
+   * @param Xsig Predicted Sigma points
+   * @param delta_t Time between k and k+1 in s
+   * @param nu_am Process noise SD longitudinal acceleration
+   * @param nu_yawdd Process noise SD yaw acceleration
+   */
+  MatrixXd PredictSigmaPoints(MatrixXd Xsig, double delta_t, double nu_am, double nu_yawdd);
+
+  /**
+   * Normalized the element-index of vector to fall inside valid range
+   * @param v_container container vector to be normalized
+   * @param index vector element position
+   */
+  void NormalizeAngleOnComponent(VectorXd v_container, int index);
+
+
 };
 
 #endif /* UKF_H */
